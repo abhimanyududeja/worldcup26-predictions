@@ -1,0 +1,21 @@
+{
+  "home_intercept": 0.2935253700945322,
+  "home_coef": [
+    0.7023312771938571,
+    -0.12641830797161202
+  ],
+  "away_intercept": 0.12005875737294246,
+  "away_coef": [
+    -0.7447322670065444,
+    -0.05324649909996959
+  ],
+  "feature_names": [
+    "elo_diff",
+    "elo_avg_c"
+  ],
+  "feature_scale": 400.0,
+  "home_advantage_elo": 65,
+  "max_goals": 10,
+  "test_log_loss": 0.8869794704777281,
+  "baseline_log_loss": 1.042705073233941
+}

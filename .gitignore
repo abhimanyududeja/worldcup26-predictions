@@ -1,0 +1,5 @@
+venv/
+__pycache__/
+*.pyc
+.DS_Store
+data/processed/matches_with_elo.csv
