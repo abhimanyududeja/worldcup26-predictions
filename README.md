@@ -1,12 +1,12 @@
 # 2026 FIFA World Cup Prediction System
-### ML model vs. my football intuition — both locked before kickoff
+### ML model vs. my football intuition - both locked before kickoff
 
 Two predictions for the 2026 FIFA World Cup (June 11 – July 19, 2026), both committed with a timestamp **before the first match was played**:
 
 1. **An ML model** built from 49,378 historical international matches (Elo + bivariate Poisson scoring) blended with current Transfermarkt squad market values.
-2. **My personal bracket** as a football fan — including bold calls the model wouldn't make.
+2. **My personal bracket** as a football fan - including bold calls the model wouldn't make.
 
-As the tournament unfolds, both predictions are scored against reality. The point isn't to "beat" the model — it's to compare what a calibrated statistical system and a human with football knowledge each get right and wrong.
+As the tournament unfolds, both predictions are scored against reality. The point isn't to "beat" the model - it's to compare what a calibrated statistical system and a human with football knowledge each get right and wrong.
 
 The model picks **Spain** as champion. I picked **France**. We agree on most R32 teams and diverge sharply at the semi-finals.
 
@@ -14,11 +14,11 @@ The model picks **Spain** as champion. I picked **France**. We agree on most R32
 
 ## Why I built this
 
-I'm a football fan first. My previous ML projects (FundTank, a brain tumor classifier) taught me techniques, but I didn't have skin in the game on whether the model was actually right. The 2026 World Cup was different — it's something I genuinely care about, and it gave me a real test: lock predictions before kickoff and see how the model holds up under the tournament.
+I'm a football fan first. My previous ML projects (FundTank, a brain tumor classifier) taught me techniques, but I didn't have skin in the game on whether the model was actually right. The 2026 World Cup was different - it's something I genuinely care about, and it gave me a real test: lock predictions before kickoff and see how the model holds up under the tournament.
 
 The biggest thing I learned was how much calibration and baseline comparisons actually matter. They're not the fun part of ML, and it's tempting to skip them. But without them, you can ship a fancy-looking model that's worse than just picking the higher-ranked team every time, and not even know it. Every model in this project is compared against baselines (always-predict-class-frequencies and pure-Elo without my adjustments), with test log loss reported honestly.
 
-If I had another month, the next thing I'd add is player-level features. The model treats Brazil with peak Neymar the same as Brazil without him. Squad market value gets part of the way there — it dropped Cristiano Ronaldo to a low value because he's 41 — but real player-level data (injuries, fitness, current form) is the obvious next step.
+If I had another month, the next thing I'd add is player-level features. The model treats Brazil with peak Neymar the same as Brazil without him. Squad market value gets part of the way there - it dropped Cristiano Ronaldo to a low value because he's 41 - but real player-level data (injuries, fitness, current form) is the obvious next step.
 
 ---
 
@@ -58,7 +58,7 @@ Standard Elo, computed over all 49,378 matches from 1872 to today. Tuning:
 Multinomial logistic regression on adjusted Elo difference. Trained on 25,316 matches from 2000 onward. **Test log loss: 0.890** vs. baseline 1.043 (14.7% improvement).
 
 ### Score Model
-Two Poisson regressions (home goals, away goals) with features `[elo_diff, elo_avg]`, scaled by /400 to keep the optimizer stable. **Test log loss: 0.887** — slightly better than the standalone match model because score modeling carries more information than 3-way classification.
+Two Poisson regressions (home goals, away goals) with features `[elo_diff, elo_avg]`, scaled by /400 to keep the optimizer stable. **Test log loss: 0.887** - slightly better than the standalone match model because score modeling carries more information than 3-way classification.
 
 ### Squad Value Adjustment
 Elo alone underrates teams whose squads are stronger than their recent results (Brazil, Portugal, Germany) and overrates teams whose qualifying campaigns inflated their Elo (Colombia, Ecuador). I pull current Transfermarkt squad values, z-score the log of squad value across the 48 teams, and add `75 × z` Elo points. Result: Portugal +98 Elo, Brazil +92, Germany +97; Australia -84, Iran -93.
@@ -96,7 +96,7 @@ Elo alone underrates teams whose squads are stronger than their recent results (
 | Finalists | 1/2 teams in common (France) |
 | Champion | DISAGREE: ML says Spain, I say France |
 
-The model and I largely agree through R16. The picture diverges sharply at SF — the model has Spain/Brazil/Germany/Ecuador, I have France/England/Netherlands/Brazil.
+The model and I largely agree through R16. The picture diverges sharply at SF - the model has Spain/Brazil/Germany/Ecuador, I have France/England/Netherlands/Brazil.
 
 ---
 
@@ -145,8 +145,8 @@ Python, pandas, scikit-learn, scipy. Historical data from [github.com/martj42/in
 
 ## Files
 
-- `src/01_*` to `src/09_*` — pipeline scripts in run order
-- `data/raw/results.csv` — historical international matches
-- `data/raw/fixtures_2026.csv` — 72 group-stage fixtures
-- `data/raw/squad_values.csv` — Transfermarkt squad values for 48 teams
-- `predictions/dual_bracket_*.json` — the locked, immutable predictions
+- `src/01_*` to `src/09_*` - pipeline scripts in run order
+- `data/raw/results.csv` - historical international matches
+- `data/raw/fixtures_2026.csv` - 72 group-stage fixtures
+- `data/raw/squad_values.csv` - Transfermarkt squad values for 48 teams
+- `predictions/dual_bracket_*.json` - the locked, immutable predictions

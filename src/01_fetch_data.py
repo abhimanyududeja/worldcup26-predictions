@@ -17,7 +17,7 @@ Pull the three data sources we need:
 Run this once; outputs land in data/raw/ as CSVs.
 
 DESIGN NOTE: Every fetch is wrapped in a try/except that falls back to a
-locally cached copy. This is deliberate — we cannot afford a network failure
+locally cached copy. This is deliberate - we cannot afford a network failure
 2 hours before kickoff to kill the pipeline.
 """
 
@@ -69,7 +69,7 @@ def fetch_fifa_rankings() -> pd.DataFrame:
     NOTE: FIFA's official site is JavaScript-rendered, so scraping it
     directly is fragile. We use a community-maintained mirror.
     If this fails, we fall back to computing pure Elo-based rankings
-    (which is fine — we don't actually NEED FIFA's number, it's a sanity check).
+    (which is fine - we don't actually NEED FIFA's number, it's a sanity check).
     """
     url = ("https://raw.githubusercontent.com/cjhutto/fifa-world-ranking/"
            "main/fifa_ranking-2024-06-20.csv")
@@ -86,7 +86,7 @@ def fetch_fifa_rankings() -> pd.DataFrame:
             df = pd.read_csv(local_path)
             print(f"[rankings] Loaded {len(df)} teams from cache")
         else:
-            print("[rankings] No rankings available. Continuing without — Elo will be the primary signal.")
+            print("[rankings] No rankings available. Continuing without - Elo will be the primary signal.")
             df = pd.DataFrame()
     return df
 
@@ -95,7 +95,7 @@ def fetch_world_cup_fixtures() -> pd.DataFrame:
     """
     2026 World Cup fixture list (104 matches).
 
-    We scrape this from Wikipedia. If the scrape fails, we error LOUDLY —
+    We scrape this from Wikipedia. If the scrape fails, we error LOUDLY -
     this is the one source we genuinely need.
 
     Returns DataFrame with columns:
