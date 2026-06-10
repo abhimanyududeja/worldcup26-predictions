@@ -16,7 +16,7 @@ with open(locked_files[-1]) as f:
 print(f"Loaded: {locked_files[-1].name}")
 print(f"Locked at: {lock['locked_at_utc']}\n")
 
-results = pd.read_csv(RAW / "results.csv")
+results = pd.read_csv(RAW / "wc2026_results.csv")
 played = results.dropna(subset=["home_score", "away_score"]).copy()
 if len(played) > 0:
     played["home_score"] = played["home_score"].astype(int)

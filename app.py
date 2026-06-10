@@ -13,6 +13,8 @@ with open(sorted((ROOT / "predictions").glob("dual_bracket_*.json"))[-1]) as f:
     locked = json.load(f)
 with open(ROOT / "data" / "processed" / "predictions_adjusted.json") as f:
     detailed = json.load(f)
+with open(ROOT / "data" / "processed" / "backtest_results.json") as f:
+    backtest = json.load(f)
 
 ml_bracket = locked["ml_model"]
 fan_bracket = locked["fan_bracket"]
@@ -169,6 +171,39 @@ for m in most_uncertain:
         ]))
 
 # ──── APP ────
+
+def make_backtest_card(yd):
+    winner, runner_up = yd["winner"], yd["runner_up"]
+    rows = []
+    for i, r in enumerate(yd["top10"][:5]):
+        marker = ""
+        if r["team"] == winner: marker = "actual winner"
+        elif r["team"] == runner_up: marker = "actual runner-up"
+        rows.append(html.Tr([
+            html.Td(str(i+1), style={"color": MUTED, "padding": "6px 8px", "width": "24px", "fontSize": "0.85em"}),
+            html.Td([fl(r["team"]), " ", r["team"]], style={"padding": "6px 8px"}),
+            html.Td(f"{r['p_win']*100:.1f}%", style={"padding": "6px 8px", "textAlign": "right", "color": ML_C, "fontWeight": "600"}),
+            html.Td(marker, style={"padding": "6px 8px", "color": FAN_C, "fontSize": "0.8em", "fontStyle": "italic"}),
+        ]))
+    return html.Div(
+        style={"background": CARD, "padding": "24px", "borderRadius": "12px",
+               "border": f"1px solid {BORDER}", "flex": "1 1 460px", "minWidth": "420px"},
+        children=[
+            html.Div(yd["name"], style={"fontSize": "0.7em", "color": MUTED,
+                "letterSpacing": "0.08em", "fontWeight": "700", "marginBottom": "10px"}),
+            html.H3([fl(winner), " ", winner, " won"], style={"margin": "0 0 16px 0", "fontSize": "1.25em"}),
+            html.Table(style={"width": "100%", "fontSize": "0.92em", "borderCollapse": "collapse", "marginBottom": "16px"},
+                children=[html.Tbody(rows)]),
+            html.Div(style={"borderTop": f"1px solid {BORDER}", "paddingTop": "12px", "fontSize": "0.85em", "color": "#334155", "lineHeight": "1.6"},
+                children=[
+                    html.Div([html.Strong(winner), f" ranked #{yd['winner_rank']} (of 32) by the model."]),
+                    html.Div([html.Strong(runner_up), f" ranked #{yd['runner_up_rank']}."], style={"marginTop": "4px"}),
+                    html.Div(["Log loss ", html.Strong(f"{yd['log_loss']:.3f}"), f" vs baseline {yd['baseline_log_loss']:.3f} (",
+                              html.Strong(f"+{yd['improvement_pct']:.1f}%"), " improvement)"], style={"marginTop": "4px"}),
+                ]),
+        ]
+    )
+
 app = dash.Dash(__name__, title="2026 World Cup Predictions",
                 external_stylesheets=["https://rsms.me/inter/inter.css"])
 server = app.server
@@ -245,7 +280,7 @@ app.layout = html.Div(
                     champion_card("ML MODEL PREDICTS", ml_bracket["champion"],
                         f"{ml_probs[0]['p_win']*100:.1f}% to win the tournament", ML_C, "#eff6ff"),
                     champion_card("FAN BRACKET", fan_bracket["champion"],
-                        "Picked by a football fan, no model involved", FAN_C, "#fffbeb"),
+                        "Picked by Abhimanyu, a football fan. No model involved.", FAN_C, "#fffbeb"),
                 ]),
 
             # TOP 10 ML
@@ -295,41 +330,46 @@ app.layout = html.Div(
                 ]),
 
             # WHERE I THINK THE MODEL IS WRONG
-            section_title("Where I think the model is wrong",
-                "Locked predictions don't mean blind confidence. Three failure modes I can identify in the model output."),
-            html.Div(style={"display": "flex", "flexWrap": "wrap", "gap": "16px"},
+            section_title("My reasoning",
+                "Where I disagree with the model, and why."),
+            html.Div(style={"background": "white", "padding": "32px", "borderRadius": "12px",
+                "border": f"1px solid {BORDER}", "borderLeft": f"4px solid {FAN_C}"},
                 children=[
-                    critique_card("UNDERRATED", "#dc2626",
-                        [fl("Portugal"), " Portugal"],
-                        ["The model has Portugal at 3.2% to win, behind Norway. Portugal has the ",
-                         html.Strong("4th-highest squad value in the tournament (€1.02B)"),
-                         ", a deep golden generation, and a real ceiling for a deep run. Their Elo got pulled down by a weak qualifying group and slow decay of the EURO 2016 peak. The squad-value adjustment (+98 Elo) helps but doesn't fully fix it. My intuition puts them in the 6–9% range."]),
-                    critique_card("OVERRATED", "#ea580c",
-                        [fl("Colombia"), " Colombia & ", fl("Ecuador"), " Ecuador"],
-                        ["Model has them at 4.5% and 4.4% - top 10. The likely cause is ",
-                         html.Strong("CONMEBOL Elo inflation"),
-                         ": every qualifying match is against Brazil, Argentina, or Uruguay, which pumps their ratings regardless of their actual ceiling against UEFA opposition. Squad value partially corrects (Colombia €330M, Ecuador €376M, both well below the European top tier) but the Elo signal still dominates."]),
-                    critique_card("OVERRATED", "#ea580c",
-                        [fl("Norway"), " Norway"],
-                        ["Model has Norway at 3.5% to win. Smaller version of the inflation story: high Elo from European qualifying success against soft opposition. Haaland–Ødegaard is real, but squad depth (€601M, 9th overall) isn't championship-caliber. I have them in my QF bracket - that's the right ceiling, the championship probability is not."]),
+                    html.Div("WHY I PICKED FRANCE", style={"fontSize": "0.7em", "color": FAN_C,
+                        "letterSpacing": "0.1em", "fontWeight": "700"}),
+                    html.H3([fl("France"), " France over ", fl("Spain"), " Spain"],
+                        style={"margin": "8px 0 16px 0", "fontSize": "1.4em"}),
+                    html.P([
+                        "Both Spain and France are the top tier of championship contenders. ",
+                        "The model has Spain at #1 (21.6%), but my read is they are much closer than that. ",
+                        "The 2026 bracket positioning likely puts them on a collision course in the round of 16 or 32. Only one of them can make a deep run."
+                    ], style={"color": "#334155", "lineHeight": "1.7", "marginBottom": "12px"}),
+                    html.P([
+                        html.Strong("I picked France for that head-to-head. "),
+                        "They have made the last two World Cup finals (winning 2018, runner-up 2022). ",
+                        "Their squad value is the highest in the tournament (€1.53B vs Spain at €1.26B). ",
+                        "Spain is the reigning Euro champion, but France has the World Cup tournament experience that I trust more when it counts."
+                    ], style={"color": "#334155", "lineHeight": "1.7", "margin": 0}),
                 ]),
 
-            html.Div(style={"marginTop": "20px", "padding": "24px", "background": BG_LIGHT,
-                "borderRadius": "10px", "border": f"1px solid {BORDER}"},
+            section_title("Backtest: model performance on past World Cups",
+                "Same Elo + Poisson core, retrained on pre-tournament data only (no lookahead bias). Squad value adjustment not included (no historical squad value data)."),
+            html.Div(style={"display": "flex", "flexWrap": "wrap", "gap": "16px"},
+                children=[make_backtest_card(backtest["2022"]), make_backtest_card(backtest["2018"])]),
+            html.Div(style={"marginTop": "20px", "padding": "24px", "background": BG_LIGHT, "borderRadius": "10px", "border": f"1px solid {BORDER}"},
                 children=[
-                    html.H4("Why this is worth surfacing", style={"margin": "0 0 8px 0"}),
-                    html.P(["This is exactly the disagreement the dual-bracket setup was designed to make visible. ",
-                        "The model is well-calibrated on average (test log loss beats baseline by 15%), but it inherits ",
-                        "the biases of its inputs - Elo over-rewards strength of schedule, squad value misses ",
-                        "intangibles like cohesion and tournament experience. If the tournament confirms the model, ",
-                        "the model wins this round. If France or Portugal goes deeper than the model expects ",
-                        "and Colombia/Ecuador exit early, the methodology lesson is that Elo-based systems need ",
-                        "domain corrections that aren't always captured by squad value alone. ",
-                        "Either way, we find out - that's what the lock is for."],
+                    html.H4("What the backtest reveals", style={"margin": "0 0 8px 0"}),
+                    html.P(["On 64 actual matches from each tournament, the model beats the uniform baseline by ",
+                        html.Strong("6.6% in 2022 and 11.0% in 2018"),
+                        ". It identified Argentina as #2 in 2022 (Argentina won) and France as #4 in 2018 (France won). Both actual finalists from both tournaments landed in the top 5."],
+                        style={"color": "#334155", "lineHeight": "1.7"}),
+                    html.P([html.Strong("The CONMEBOL inflation problem is real. "),
+                        "Brazil was the model's #1 pick in BOTH 2018 and 2022, with 25%+ win probability each time. Brazil won neither. This is exactly the pattern called out in the \"where the model is wrong\" section above. The 2026 model's squad value adjustment partially corrects this: Brazil drops from a hypothetical #1 (pure Elo) to #5 (6.3% in 2026)."],
+                        style={"color": "#334155", "lineHeight": "1.7"}),
+                    html.P([html.Strong("Honest miss: "), "Croatia's run to the 2018 final (model ranked them #13). Almost no pre-tournament model predicted that run, but it's a real failure mode worth surfacing."],
                         style={"color": "#334155", "lineHeight": "1.7", "margin": 0}),
                 ]),
 
-            # GROUPS
             section_title("Group stage: 12 groups, 48 teams",
                 "Teams ranked by adjusted Elo. 'Adv' = model's predicted probability of advancing to R32."),
             html.Div(style={"display": "flex", "flexWrap": "wrap", "gap": "16px"},
@@ -343,12 +383,12 @@ app.layout = html.Div(
 
             # 72 MATCHES
             section_title("All 72 group matches",
-                "Full per-match predictions. Sortable. xG = expected goals (Poisson rate parameter)."),
+                "All 72 matches at neutral venues. 'Win (1st)' refers to the team listed first in the match; 'Win (2nd)' to the team listed second. xG = expected goals (Poisson rate parameter)."),
             dash_table.DataTable(data=match_table,
                 columns=[{"name": "Date", "id": "Date"}, {"name": "Grp", "id": "G"},
-                    {"name": "Match", "id": "Match"}, {"name": "Home", "id": "Home"},
-                    {"name": "Draw", "id": "Draw"}, {"name": "Away", "id": "Away"},
-                    {"name": "xG (H)", "id": "xG_H"}, {"name": "xG (A)", "id": "xG_A"},
+                    {"name": "Match", "id": "Match"}, {"name": "Win (1st)", "id": "Home"},
+                    {"name": "Draw", "id": "Draw"}, {"name": "Win (2nd)", "id": "Away"},
+                    {"name": "xG (1st)", "id": "xG_H"}, {"name": "xG (2nd)", "id": "xG_A"},
                     {"name": "Most Likely", "id": "Likely"}],
                 sort_action="native", page_size=18,
                 style_table={"borderRadius": "10px", "overflow": "hidden", "border": f"1px solid {BORDER}"},
@@ -447,6 +487,25 @@ app.layout = html.Div(
                     " · Locked before kickoff, scored against reality as the tournament unfolds."])]),
         ])]
 )
+
+
+app.index_string = """<!DOCTYPE html>
+<html>
+<head>
+<title>{%title%}</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%231e3a8a'/><text x='50' y='68' font-size='48' text-anchor='middle' fill='white' font-family='Inter,system-ui,sans-serif' font-weight='700'>26</text></svg>">
+{%metas%}
+{%css%}
+</head>
+<body>
+{%app_entry%}
+<footer>
+{%config%}
+{%scripts%}
+{%renderer%}
+</footer>
+</body>
+</html>"""
 
 if __name__ == "__main__":
     app.run(debug=False, host="0.0.0.0", port=8050)
