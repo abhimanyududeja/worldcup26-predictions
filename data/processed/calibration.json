@@ -1,0 +1,69 @@
+{
+  "calibration": [
+    {
+      "bin_low": 0,
+      "bin_high": 0.1,
+      "avg_predicted": 0.07638484855996376,
+      "avg_actual": 0.2857142857142857,
+      "n": 7
+    },
+    {
+      "bin_low": 0.1,
+      "bin_high": 0.2,
+      "avg_predicted": 0.15211232514580084,
+      "avg_actual": 0.15384615384615385,
+      "n": 52
+    },
+    {
+      "bin_low": 0.2,
+      "bin_high": 0.3,
+      "avg_predicted": 0.25870230281455303,
+      "avg_actual": 0.23163841807909605,
+      "n": 177
+    },
+    {
+      "bin_low": 0.3,
+      "bin_high": 0.4,
+      "avg_predicted": 0.3520032139523149,
+      "avg_actual": 0.43243243243243246,
+      "n": 37
+    },
+    {
+      "bin_low": 0.4,
+      "bin_high": 0.5,
+      "avg_predicted": 0.4543358166001988,
+      "avg_actual": 0.41304347826086957,
+      "n": 46
+    },
+    {
+      "bin_low": 0.5,
+      "bin_high": 0.6,
+      "avg_predicted": 0.5467618097476505,
+      "avg_actual": 0.6071428571428571,
+      "n": 28
+    },
+    {
+      "bin_low": 0.6,
+      "bin_high": 0.7,
+      "avg_predicted": 0.6390567107599838,
+      "avg_actual": 0.6896551724137931,
+      "n": 29
+    },
+    {
+      "bin_low": 0.7,
+      "bin_high": 0.8,
+      "avg_predicted": 0.7354316855291992,
+      "avg_actual": 0.7142857142857143,
+      "n": 7
+    },
+    {
+      "bin_low": 0.8,
+      "bin_high": 0.9,
+      "avg_predicted": 0.8515939907997868,
+      "avg_actual": 0.0,
+      "n": 1
+    }
+  ],
+  "n_total": 384,
+  "expected_calibration_error": 0.04004880703796466
+}

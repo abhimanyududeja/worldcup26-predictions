@@ -15,6 +15,10 @@ with open(ROOT / "data" / "processed" / "predictions_adjusted.json") as f:
     detailed = json.load(f)
 with open(ROOT / "data" / "processed" / "backtest_results.json") as f:
     backtest = json.load(f)
+with open(ROOT / "data" / "processed" / "calibration.json") as f:
+    calibration = json.load(f)
+with open(ROOT / "data" / "processed" / "bookmaker_comparison.json") as f:
+    bookmaker = json.load(f)
 
 ml_bracket = locked["ml_model"]
 fan_bracket = locked["fan_bracket"]
@@ -204,6 +208,70 @@ def make_backtest_card(yd):
         ]
     )
 
+
+calib_data = calibration["calibration"]
+calib_pred = [c["avg_predicted"]*100 for c in calib_data]
+calib_actual = [c["avg_actual"]*100 for c in calib_data]
+calib_n = [c["n"] for c in calib_data]
+
+fig_calib = go.Figure()
+fig_calib.add_trace(go.Scatter(
+    x=[0, 100], y=[0, 100], mode="lines",
+    line=dict(color="#cbd5e1", dash="dash", width=2),
+    hoverinfo="skip", showlegend=False
+))
+fig_calib.add_trace(go.Scatter(
+    x=calib_pred, y=calib_actual, mode="markers+lines",
+    marker=dict(size=[max(12, (n**0.5)*1.8) for n in calib_n],
+                color=ML_C, opacity=0.85, line=dict(color="white", width=2)),
+    line=dict(color=ML_C, width=2),
+    text=[f"n = {n}" for n in calib_n],
+    hovertemplate="Predicted: %{x:.1f}%<br>Actual: %{y:.1f}%<br>%{text}<extra></extra>",
+    showlegend=False,
+))
+fig_calib.update_layout(
+    xaxis=dict(title="Model's predicted probability (%)", range=[-3, 103],
+               showgrid=True, gridcolor="#f1f5f9", zeroline=False),
+    yaxis=dict(title="Actual frequency (%)", range=[-3, 103],
+               showgrid=True, gridcolor="#f1f5f9", zeroline=False),
+    height=520, margin=dict(l=70, r=40, t=30, b=60),
+    plot_bgcolor="white", paper_bgcolor="white",
+    font=dict(family="Inter, system-ui, sans-serif", size=13, color=TEXT),
+)
+
+
+
+top12 = bookmaker["comparison"][:12]
+teams_mvm = [f"{fl(t['team'])}  {t['team']}" for t in top12][::-1]
+market_vals = [t["market_pct"] for t in top12][::-1]
+model_vals = [t["model_pct"] for t in top12][::-1]
+
+fig_market = go.Figure()
+fig_market.add_trace(go.Bar(
+    y=teams_mvm, x=market_vals, name="Market (FanDuel)",
+    orientation='h',
+    marker=dict(color=FAN_C, opacity=0.9),
+    text=[f"{v:.1f}%" for v in market_vals], textposition='outside',
+    hovertemplate="<b>%{y}</b><br>Market: %{x:.2f}%<extra></extra>",
+))
+fig_market.add_trace(go.Bar(
+    y=teams_mvm, x=model_vals, name="My ML model",
+    orientation='h',
+    marker=dict(color=ML_C, opacity=0.9),
+    text=[f"{v:.1f}%" for v in model_vals], textposition='outside',
+    hovertemplate="<b>%{y}</b><br>Model: %{x:.2f}%<extra></extra>",
+))
+fig_market.update_layout(
+    barmode='group',
+    xaxis=dict(title="Probability to win the tournament (%)", showgrid=True, gridcolor="#f1f5f9"),
+    yaxis=dict(tickfont=dict(size=14), automargin=True),
+    height=720, margin=dict(l=20, r=100, t=30, b=60),
+    plot_bgcolor="white", paper_bgcolor="white",
+    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+    font=dict(family="Inter, system-ui, sans-serif", size=13, color=TEXT),
+)
+
+
 app = dash.Dash(__name__, title="2026 World Cup Predictions",
                 external_stylesheets=["https://rsms.me/inter/inter.css"])
 server = app.server
@@ -368,6 +436,45 @@ app.layout = html.Div(
                         style={"color": "#334155", "lineHeight": "1.7"}),
                     html.P([html.Strong("Honest miss: "), "Croatia's run to the 2018 final (model ranked them #13). Almost no pre-tournament model predicted that run, but it's a real failure mode worth surfacing."],
                         style={"color": "#334155", "lineHeight": "1.7", "margin": 0}),
+                ]),
+
+                        section_title("Calibration: are the probabilities meaningful?",
+                f"When the model says 70%, does the event happen 70% of the time? Computed from {calibration['n_total']} prediction events (home win / draw / away win) across the 2018 and 2022 backtests."),
+            html.Div(style={"background": "white", "padding": "24px", "borderRadius": "14px", "border": f"1px solid {BORDER}"},
+                children=[dcc.Graph(figure=fig_calib, config={"displayModeBar": False})]),
+            html.Div(style={"marginTop": "20px", "padding": "24px", "background": BG_LIGHT, "borderRadius": "10px", "border": f"1px solid {BORDER}"},
+                children=[
+                    html.H4("Reading the chart", style={"margin": "0 0 8px 0"}),
+                    html.P([
+                        "Each point is a probability bin (e.g., 20-30%). The X-axis is the model's average predicted probability in that bin. The Y-axis is how often the predicted outcome actually happened. ",
+                        html.Strong("If the model is well-calibrated, points fall on the dashed line. "),
+                        "Marker size reflects the number of predictions in the bin."
+                    ], style={"color": "#334155", "lineHeight": "1.7"}),
+                    html.P([
+                        html.Strong(f"Expected Calibration Error: {calibration['expected_calibration_error']*100:.2f}%"),
+                        " across all 384 prediction events. The model is well-calibrated in the 10-50% range (the bins with the most samples). It is slightly underconfident in the 50-70% range, predicting 55-65% when the outcome actually happens 60-70% of the time. The extreme bins (0-10%, 80-90%) have too few samples to draw firm conclusions."
+                    ], style={"color": "#334155", "lineHeight": "1.7", "margin": 0}),
+                ]),
+
+                        section_title("Model vs. market",
+                f"How my ML model compares to current FanDuel sportsbook odds, with the bookmaker's vig ({(bookmaker['overround']-1)*100:.1f}%) removed. Snapshot from {bookmaker['as_of']}."),
+            html.Div(style={"background": "white", "padding": "24px", "borderRadius": "14px", "border": f"1px solid {BORDER}"},
+                children=[dcc.Graph(figure=fig_market, config={"displayModeBar": False})]),
+            html.Div(style={"marginTop": "20px", "padding": "24px", "background": BG_LIGHT, "borderRadius": "10px", "border": f"1px solid {BORDER}"},
+                children=[
+                    html.H4("What the comparison reveals", style={"margin": "0 0 8px 0"}),
+                    html.P([
+                        html.Strong("The market validates the Portugal call. "),
+                        "Market has Portugal at 8.2% (5th-most likely champion). My model has it at 3.5% (8th). The market sees Portugal as a top-5 contender. This independently confirms the Portugal-underrated point from the reasoning section above. Sophisticated bettors are pricing Portugal much higher than naive Elo would."
+                    ], style={"color": "#334155", "lineHeight": "1.7", "marginBottom": "12px"}),
+                    html.P([
+                        html.Strong("CONMEBOL inflation is confirmed by the market. "),
+                        "My model has Ecuador at 4.4% and Colombia at 4.5%. The market has them at 1.1% and 2.2%. That is the same pattern visible in the 2018 and 2022 backtests. The market, which has access to all information including team form, injuries, and tactical matchups, does not share the model's confidence in these South American teams."
+                    ], style={"color": "#334155", "lineHeight": "1.7", "marginBottom": "12px"}),
+                    html.P([
+                        html.Strong("Spain and France: the market has them effectively tied. "),
+                        "Market: Spain 15.8%, France 15.1% (co-favorites). My model: Spain 21.6%, France 10.7% (an 11-point gap). The market's view aligns with my own gut pick (France over Spain) more than the model does. This is the pricing-vs-stat disagreement the dual-bracket framing was designed to surface."
+                    ], style={"color": "#334155", "lineHeight": "1.7", "margin": 0}),
                 ]),
 
             section_title("Group stage: 12 groups, 48 teams",

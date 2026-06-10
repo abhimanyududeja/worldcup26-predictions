@@ -213,7 +213,7 @@ def run_backtest(year, matches):
     for i, (t, e) in enumerate(team_elos[:10]):
         mark = " <- actual winner" if t == cfg["winner"] else (" <- actual runner-up" if t == cfg["runner_up"] else "")
         print(f"  {i+1:2d}. {t:24s} {int(e):4d}{mark}")
-    losses, correct = [], 0
+    losses, correct, per_match = [], 0, []
     for _, m in wc.iterrows():
         h, a = m["home_team"], m["away_team"]
         hs, as_ = m["home_score"], m["away_score"]
@@ -227,6 +227,12 @@ def run_backtest(year, matches):
         probs = [p["p_home_win"], p["p_draw"], p["p_away_win"]]
         pred_l = ["H", "D", "A"][int(np.argmax(probs))]
         if pred_l == actual_l: correct += 1
+        per_match.append({
+            "home": h, "away": a, "actual": actual_l,
+            "p_home_win": float(p["p_home_win"]),
+            "p_draw": float(p["p_draw"]),
+            "p_away_win": float(p["p_away_win"]),
+        })
     mean_ll = float(np.mean(losses))
     baseline_ll = float(-np.log(1/3))
     print(f"\nLog loss on {len(losses)} actual matches: {mean_ll:.4f}")
@@ -274,7 +280,7 @@ def run_backtest(year, matches):
         "improvement_pct": (baseline_ll-mean_ll)/baseline_ll*100,
         "outcome_accuracy": correct/len(losses),
         "winner_rank": int(champ_rank), "runner_up_rank": int(ru_rank),
-        "top10": results[:10], "all_picks": results,
+        "top10": results[:10], "all_picks": results, "per_match": per_match,
     }
 
 
