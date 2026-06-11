@@ -69,13 +69,13 @@ fig_top10 = go.Figure(go.Bar(
     orientation='h',
     marker=dict(color=[ML_C if i == len(top10)-1 else "#3b82f6" for i in range(len(top10))]),
     text=[f"<b>{t['p_win']*100:.1f}%</b>" for t in top10][::-1],
-    textposition='outside', textfont=dict(size=15, color=TEXT),
+    textposition='auto', textfont=dict(size=13, color=TEXT),
     hovertemplate="<b>%{y}</b><br>%{x:.1f}% chance to win<extra></extra>"
 ))
 fig_top10.update_layout(
     xaxis=dict(title="Win probability (%)", showgrid=True, gridcolor="#f1f5f9", zeroline=False),
-    yaxis=dict(tickfont=dict(size=16), automargin=True),
-    height=540, margin=dict(l=20, r=120, t=30, b=60),
+    yaxis=dict(tickfont=dict(size=13), automargin=True),
+    height=460, margin=dict(l=10, r=30, t=30, b=60), autosize=True,
     plot_bgcolor="white", paper_bgcolor="white",
     font=dict(family="Inter, system-ui, sans-serif", size=13, color=TEXT),
 )
@@ -100,12 +100,12 @@ fig_fan = go.Figure(go.Bar(
     orientation='h',
     marker=dict(color=[STAGE_COLORS.get(d[1], "#fbbf24") for d in fan_picks_sorted][::-1]),
     text=[STAGE_LBL[d[1]] for d in fan_picks_sorted][::-1],
-    textposition='outside', textfont=dict(size=14, color=TEXT),
+    textposition='auto', textfont=dict(size=13, color=TEXT),
     hovertemplate="<b>%{y}</b><br>Picked to reach: %{text}<extra></extra>"
 ))
 fig_fan.update_layout(
     xaxis=dict(showticklabels=False, showgrid=False, zeroline=False, range=[0, 8]),
-    yaxis=dict(tickfont=dict(size=16), automargin=True),
+    yaxis=dict(tickfont=dict(size=13), automargin=True),
     height=460, margin=dict(l=20, r=160, t=30, b=30),
     plot_bgcolor="white", paper_bgcolor="white",
     font=dict(family="Inter, system-ui, sans-serif", size=13, color=TEXT),
@@ -245,7 +245,7 @@ fig_calib.update_layout(
                showgrid=True, gridcolor="#f1f5f9", zeroline=False),
     yaxis=dict(title="Actual frequency (%)", range=[-3, 103],
                showgrid=True, gridcolor="#f1f5f9", zeroline=False),
-    height=520, margin=dict(l=70, r=40, t=30, b=60),
+    height=440, margin=dict(l=50, r=20, t=30, b=60), autosize=True,
     plot_bgcolor="white", paper_bgcolor="white",
     font=dict(family="Inter, system-ui, sans-serif", size=13, color=TEXT),
 )
@@ -262,21 +262,21 @@ fig_market.add_trace(go.Bar(
     y=teams_mvm, x=market_vals, name="Market (FanDuel)",
     orientation='h',
     marker=dict(color=FAN_C, opacity=0.9),
-    text=[f"{v:.1f}%" for v in market_vals], textposition='outside',
+    text=[f"{v:.1f}%" for v in market_vals], textposition='auto',
     hovertemplate="<b>%{y}</b><br>Market: %{x:.2f}%<extra></extra>",
 ))
 fig_market.add_trace(go.Bar(
     y=teams_mvm, x=model_vals, name="My ML model",
     orientation='h',
     marker=dict(color=ML_C, opacity=0.9),
-    text=[f"{v:.1f}%" for v in model_vals], textposition='outside',
+    text=[f"{v:.1f}%" for v in model_vals], textposition='auto',
     hovertemplate="<b>%{y}</b><br>Model: %{x:.2f}%<extra></extra>",
 ))
 fig_market.update_layout(
     barmode='group',
     xaxis=dict(title="Probability to win the tournament (%)", showgrid=True, gridcolor="#f1f5f9"),
     yaxis=dict(tickfont=dict(size=14), automargin=True),
-    height=720, margin=dict(l=20, r=100, t=30, b=60),
+    height=560, margin=dict(l=10, r=30, t=30, b=60), autosize=True,
     plot_bgcolor="white", paper_bgcolor="white",
     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
     font=dict(family="Inter, system-ui, sans-serif", size=13, color=TEXT),
