@@ -100,7 +100,7 @@ fig_fan = go.Figure(go.Bar(
     orientation='h',
     marker=dict(color=[STAGE_COLORS.get(d[1], "#fbbf24") for d in fan_picks_sorted][::-1]),
     text=[STAGE_LBL[d[1]] for d in fan_picks_sorted][::-1],
-    textposition='auto', textfont=dict(size=13, color=TEXT),
+    textposition='none', textfont=dict(size=13, color=TEXT),
     hovertemplate="<b>%{y}</b><br>Picked to reach: %{text}<extra></extra>"
 ))
 fig_fan.update_layout(
