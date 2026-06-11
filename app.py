@@ -21,6 +21,17 @@ with open(ROOT / "data" / "processed" / "bookmaker_comparison.json") as f:
     bookmaker = json.load(f)
 
 ml_bracket = locked["ml_model"]
+
+# Reconstruct ML SF teams to include both finalists.
+# The locked file computed SF (top 4 by P(SF)) and finalists (top 2 by P(final))
+# independently, which produced an impossible bracket where a finalist (France)
+# was not in the top-4 SF list. Display-only fix; locked predictions unchanged.
+_ml_finalists = list(ml_bracket["finalists"])
+_p_sf_sorted = sorted(locked["ml_full_probs"], key=lambda x: -x["p_sf"])
+_other_sf = [t["team"] for t in _p_sf_sorted
+             if t["team"] not in _ml_finalists][:max(0, 4 - len(_ml_finalists))]
+ml_bracket = dict(ml_bracket)
+ml_bracket["sf_teams"] = _ml_finalists + _other_sf
 fan_bracket = locked["fan_bracket"]
 ml_probs = sorted(locked["ml_full_probs"], key=lambda x: x["p_win"], reverse=True)
 match_preds = detailed["match_predictions"]
@@ -343,6 +354,29 @@ app.layout = html.Div(
             ], style={"marginBottom": "48px"}),
 
             # HEADLINE CARDS
+            
+            # Hero TL;DR - the whole thesis in one banner
+            html.Div(style={"background": "white", "padding": "28px 32px",
+                "borderRadius": "14px", "border": f"2px solid {ML_C}",
+                "marginBottom": "32px", "fontSize": "1.1em", "lineHeight": "1.7"},
+                children=[
+                    html.Div("THE BET", style={"fontSize": "0.72em", "color": ML_C,
+                        "letterSpacing": "0.15em", "fontWeight": "700",
+                        "marginBottom": "14px"}),
+                    html.Div([
+                        html.Span("Three predictions, all locked before kickoff. "),
+                        html.Strong("My ML model says Spain wins. ",
+                            style={"color": ML_C}),
+                        html.Strong("I say France wins. ",
+                            style={"color": FAN_C}),
+                        html.Strong("FanDuel has them co-favorites. ",
+                            style={"color": "#7c3aed"}),
+                        "Two of these three will be more wrong than the third. ",
+                        html.Span("Scroll to see where they disagree.",
+                            style={"color": MUTED, "fontStyle": "italic"}),
+                    ]),
+                ]),
+
             html.Div(style={"display": "flex", "gap": "20px", "flexWrap": "wrap"},
                 children=[
                     champion_card("ML MODEL PREDICTS", ml_bracket["champion"],
@@ -366,7 +400,7 @@ app.layout = html.Div(
                 children=[dcc.Graph(figure=fig_fan, config={"displayModeBar": False})]),
 
             # DIVERGENCE TABLE
-            section_title("Where the model and the fan diverge",
+            section_title("Where my football brain disagrees with the model",
                 "Side-by-side picks for each knockout stage."),
             html.Div(style={"background": "white", "borderRadius": "14px",
                 "border": f"1px solid {BORDER}", "overflow": "hidden"},
@@ -398,7 +432,7 @@ app.layout = html.Div(
                 ]),
 
             # WHERE I THINK THE MODEL IS WRONG
-            section_title("My reasoning",
+            section_title("My reasoning for picking France over Spain",
                 "Where I disagree with the model, and why."),
             html.Div(style={"background": "white", "padding": "32px", "borderRadius": "12px",
                 "border": f"1px solid {BORDER}", "borderLeft": f"4px solid {FAN_C}"},
@@ -460,36 +494,78 @@ app.layout = html.Div(
                 f"How my ML model compares to current FanDuel sportsbook odds, with the bookmaker's vig ({(bookmaker['overround']-1)*100:.1f}%) removed. Snapshot from {bookmaker['as_of']}."),
             html.Div(style={"background": "white", "padding": "24px", "borderRadius": "14px", "border": f"1px solid {BORDER}"},
                 children=[dcc.Graph(figure=fig_market, config={"displayModeBar": False})]),
-            html.Div(style={"marginTop": "20px", "padding": "24px", "background": BG_LIGHT, "borderRadius": "10px", "border": f"1px solid {BORDER}"},
-                children=[
-                    html.H4("What the comparison reveals", style={"margin": "0 0 8px 0"}),
-                    html.P([
-                        html.Strong("The market validates the Portugal call. "),
-                        "Market has Portugal at 8.2% (5th-most likely champion). My model has it at 3.5% (8th). The market sees Portugal as a top-5 contender. This independently confirms the Portugal-underrated point from the reasoning section above. Sophisticated bettors are pricing Portugal much higher than naive Elo would."
-                    ], style={"color": "#334155", "lineHeight": "1.7", "marginBottom": "12px"}),
-                    html.P([
-                        html.Strong("CONMEBOL inflation is confirmed by the market. "),
-                        "My model has Ecuador at 4.4% and Colombia at 4.5%. The market has them at 1.1% and 2.2%. That is the same pattern visible in the 2018 and 2022 backtests. The market, which has access to all information including team form, injuries, and tactical matchups, does not share the model's confidence in these South American teams."
-                    ], style={"color": "#334155", "lineHeight": "1.7", "marginBottom": "12px"}),
-                    html.P([
-                        html.Strong("Spain and France: the market has them effectively tied. "),
-                        "Market: Spain 15.8%, France 15.1% (co-favorites). My model: Spain 21.6%, France 10.7% (an 11-point gap). The market's view aligns with my own gut pick (France over Spain) more than the model does. This is the pricing-vs-stat disagreement the dual-bracket framing was designed to surface."
-                    ], style={"color": "#334155", "lineHeight": "1.7", "margin": 0}),
+            html.Div(style={"display": "grid",
+                "gridTemplateColumns": "repeat(auto-fit, minmax(280px, 1fr))",
+                "gap": "16px", "marginTop": "20px"}, children=[
+
+                html.Div(style={"background": "white", "padding": "24px",
+                    "borderRadius": "12px", "border": f"1px solid {BORDER}",
+                    "borderTop": f"4px solid {FAN_C}"}, children=[
+                    html.Div("PORTUGAL", style={"fontSize": "0.72em", "color": FAN_C,
+                        "letterSpacing": "0.12em", "fontWeight": "700"}),
+                    html.H3("Market validates my call",
+                        style={"margin": "8px 0 16px 0", "fontSize": "1.15em"}),
+                    html.Div(style={"display": "flex", "gap": "24px", "marginBottom": "12px"}, children=[
+                        html.Div([html.Div("MARKET", style={"fontSize": "0.7em", "color": MUTED}),
+                                  html.Div("8.2%", style={"fontSize": "1.6em", "fontWeight": "700"})]),
+                        html.Div([html.Div("MODEL", style={"fontSize": "0.7em", "color": MUTED}),
+                                  html.Div("3.5%", style={"fontSize": "1.6em", "fontWeight": "700",
+                                  "color": MUTED})]),
+                    ]),
+                    html.Div("Sharp bettors price Portugal as a top-5 contender. Model has them 8th.",
+                        style={"color": "#334155", "fontSize": "0.92em", "lineHeight": "1.5"}),
                 ]),
 
-            section_title("Group stage: 12 groups, 48 teams",
+                html.Div(style={"background": "white", "padding": "24px",
+                    "borderRadius": "12px", "border": f"1px solid {BORDER}",
+                    "borderTop": "4px solid #dc2626"}, children=[
+                    html.Div("CONMEBOL INFLATION", style={"fontSize": "0.72em", "color": "#dc2626",
+                        "letterSpacing": "0.12em", "fontWeight": "700"}),
+                    html.H3("Confirmed by the market",
+                        style={"margin": "8px 0 16px 0", "fontSize": "1.15em"}),
+                    html.Div(style={"display": "flex", "gap": "24px", "marginBottom": "12px", "flexWrap": "wrap"}, children=[
+                        html.Div([html.Div("ECUADOR", style={"fontSize": "0.7em", "color": MUTED}),
+                                  html.Div("4.4% vs 1.1%", style={"fontSize": "1.1em", "fontWeight": "700"})]),
+                        html.Div([html.Div("COLOMBIA", style={"fontSize": "0.7em", "color": MUTED}),
+                                  html.Div("4.5% vs 2.2%", style={"fontSize": "1.1em", "fontWeight": "700"})]),
+                    ]),
+                    html.Div("Same pattern visible in 2018 and 2022 backtests. The market does not share the model's confidence in South American teams.",
+                        style={"color": "#334155", "fontSize": "0.92em", "lineHeight": "1.5"}),
+                ]),
+
+                html.Div(style={"background": "white", "padding": "24px",
+                    "borderRadius": "12px", "border": f"1px solid {BORDER}",
+                    "borderTop": f"4px solid {ML_C}"}, children=[
+                    html.Div("SPAIN VS FRANCE", style={"fontSize": "0.72em", "color": ML_C,
+                        "letterSpacing": "0.12em", "fontWeight": "700"}),
+                    html.H3("Market sides with my gut",
+                        style={"margin": "8px 0 16px 0", "fontSize": "1.15em"}),
+                    html.Div(style={"display": "flex", "gap": "24px", "marginBottom": "12px", "flexWrap": "wrap"}, children=[
+                        html.Div([html.Div("MARKET", style={"fontSize": "0.7em", "color": MUTED}),
+                                  html.Div("15.8 / 15.1%", style={"fontSize": "1.1em", "fontWeight": "700"}),
+                                  html.Div("Tied", style={"fontSize": "0.78em", "color": MUTED})]),
+                        html.Div([html.Div("MODEL", style={"fontSize": "0.7em", "color": MUTED}),
+                                  html.Div("21.6 / 10.7%", style={"fontSize": "1.1em", "fontWeight": "700"}),
+                                  html.Div("11pt gap", style={"fontSize": "0.78em", "color": MUTED})]),
+                    ]),
+                    html.Div("Market and fan bracket both pick France over Spain. Model strongly disagrees.",
+                        style={"color": "#334155", "fontSize": "0.92em", "lineHeight": "1.5"}),
+                ]),
+            ]),
+
+            section_title("How the model rates every team in every group",
                 "Teams ranked by adjusted Elo. 'Adv' = model's predicted probability of advancing to R32."),
             html.Div(style={"display": "flex", "flexWrap": "wrap", "gap": "16px"},
                 children=[make_group_card(g) for g in sorted(group_teams.keys())]),
 
             # HARDEST CALLS
-            section_title("The model's hardest calls",
+            section_title("Coin flips: the matches the model is least sure about",
                 "Group matches with the highest prediction entropy - closest to 50/50."),
             html.Div(style={"display": "flex", "flexWrap": "wrap", "gap": "16px"},
                 children=uncertain_cards),
 
             # 72 MATCHES
-            section_title("All 72 group matches",
+            section_title("Every group match with a locked prediction",
                 "All 72 matches at neutral venues. 'Win (1st)' refers to the team listed first in the match; 'Win (2nd)' to the team listed second. xG = expected goals (Poisson rate parameter)."),
             dash_table.DataTable(data=match_table,
                 columns=[{"name": "Date", "id": "Date"}, {"name": "Grp", "id": "G"},
@@ -509,7 +585,7 @@ app.layout = html.Div(
             ),
 
             # 48 TEAMS
-            section_title("Tournament progression: all 48 teams",
+            section_title("Every team's odds at every stage",
                 "Each cell = probability the team reaches that stage or beyond, from 10,000 simulations."),
             dash_table.DataTable(
                 data=[{"T": f"{fl(r['team'])} {r['team']}", "Elo": int(r["elo_adj"]),
