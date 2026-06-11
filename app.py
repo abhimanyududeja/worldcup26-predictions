@@ -22,16 +22,6 @@ with open(ROOT / "data" / "processed" / "bookmaker_comparison.json") as f:
 
 ml_bracket = locked["ml_model"]
 
-# Reconstruct ML SF teams to include both finalists.
-# The locked file computed SF (top 4 by P(SF)) and finalists (top 2 by P(final))
-# independently, which produced an impossible bracket where a finalist (France)
-# was not in the top-4 SF list. Display-only fix; locked predictions unchanged.
-_ml_finalists = list(ml_bracket["finalists"])
-_p_sf_sorted = sorted(locked["ml_full_probs"], key=lambda x: -x["p_sf"])
-_other_sf = [t["team"] for t in _p_sf_sorted
-             if t["team"] not in _ml_finalists][:max(0, 4 - len(_ml_finalists))]
-ml_bracket = dict(ml_bracket)
-ml_bracket["sf_teams"] = _ml_finalists + _other_sf
 fan_bracket = locked["fan_bracket"]
 ml_probs = sorted(locked["ml_full_probs"], key=lambda x: x["p_win"], reverse=True)
 match_preds = detailed["match_predictions"]
@@ -432,8 +422,8 @@ app.layout = html.Div(
                 ]),
 
             # WHERE I THINK THE MODEL IS WRONG
-            section_title("My reasoning for picking France over Spain",
-                "Where I disagree with the model, and why."),
+            section_title("Where I'm betting against the model",
+                "Two SF disagreements. The Final follows from those."),
             html.Div(style={"background": "white", "padding": "32px", "borderRadius": "12px",
                 "border": f"1px solid {BORDER}", "borderLeft": f"4px solid {FAN_C}"},
                 children=[
@@ -443,15 +433,20 @@ app.layout = html.Div(
                         style={"margin": "8px 0 16px 0", "fontSize": "1.4em"}),
                     html.P([
                         "Both Spain and France are the top tier of championship contenders. ",
-                        "The model has Spain at #1 (21.6%), but my read is they are much closer than that. ",
-                        "The 2026 bracket positioning likely puts them on a collision course in the round of 16 or 32. Only one of them can make a deep run."
+                        f"The model has Spain at #1 ({team_probs['Spain']['p_win']*100:.1f}%) and France at #3 ({team_probs['France']['p_win']*100:.1f}%), but my read is they’re much closer than that gap suggests. ",
+                        "Under the actual 2026 bracket they’re in the same half — they meet in semi-final M101. Only one of them survives to play for the trophy."
                     ], style={"color": "#334155", "lineHeight": "1.7", "marginBottom": "12px"}),
                     html.P([
                         html.Strong("I picked France for that head-to-head. "),
                         "They have made the last two World Cup finals (winning 2018, runner-up 2022). ",
                         "Their squad value is the highest in the tournament (€1.53B vs Spain at €1.26B). ",
                         "Spain is the reigning Euro champion, but France has the World Cup tournament experience that I trust more when it counts."
-                    ], style={"color": "#334155", "lineHeight": "1.7", "margin": 0}),
+                    ], style={"color": "#334155", "lineHeight": "1.7", "margin": "0 0 16px 0"}),
+                    html.P([
+                        html.Strong("Second disagreement, weaker take: "),
+                        f"the model also picks Argentina ({team_probs['Argentina']['p_win']*100:.1f}%) over Brazil ({team_probs['Brazil']['p_win']*100:.1f}%) in semi-final M102. I picked Brazil. Honest read: this is the pick I’m least confident about. The model’s CONMEBOL adjustment is already doing real work — see backtest section below."
+                    ], style={"color": "#334155", "lineHeight": "1.7", "margin": 0, "padding": "16px",
+                        "background": BG_LIGHT, "borderRadius": "8px"}),
                 ]),
 
             section_title("Backtest: model performance on past World Cups",
@@ -509,10 +504,10 @@ app.layout = html.Div(
                         html.Div([html.Div("MARKET", style={"fontSize": "0.7em", "color": MUTED}),
                                   html.Div("8.2%", style={"fontSize": "1.6em", "fontWeight": "700"})]),
                         html.Div([html.Div("MODEL", style={"fontSize": "0.7em", "color": MUTED}),
-                                  html.Div("3.5%", style={"fontSize": "1.6em", "fontWeight": "700",
+                                  html.Div("3.6%", style={"fontSize": "1.6em", "fontWeight": "700",
                                   "color": MUTED})]),
                     ]),
-                    html.Div("Sharp bettors price Portugal as a top-5 contender. Model has them 8th.",
+                    html.Div("Sharp bettors price Portugal as a top-5 contender. Model has them 7th.",
                         style={"color": "#334155", "fontSize": "0.92em", "lineHeight": "1.5"}),
                 ]),
 
@@ -525,9 +520,9 @@ app.layout = html.Div(
                         style={"margin": "8px 0 16px 0", "fontSize": "1.15em"}),
                     html.Div(style={"display": "flex", "gap": "24px", "marginBottom": "12px", "flexWrap": "wrap"}, children=[
                         html.Div([html.Div("ECUADOR", style={"fontSize": "0.7em", "color": MUTED}),
-                                  html.Div("4.4% vs 1.1%", style={"fontSize": "1.1em", "fontWeight": "700"})]),
+                                  html.Div("2.8% vs 1.1%", style={"fontSize": "1.1em", "fontWeight": "700"})]),
                         html.Div([html.Div("COLOMBIA", style={"fontSize": "0.7em", "color": MUTED}),
-                                  html.Div("4.5% vs 2.2%", style={"fontSize": "1.1em", "fontWeight": "700"})]),
+                                  html.Div("3.1% vs 2.2%", style={"fontSize": "1.1em", "fontWeight": "700"})]),
                     ]),
                     html.Div("Same pattern visible in 2018 and 2022 backtests. The market does not share the model's confidence in South American teams.",
                         style={"color": "#334155", "fontSize": "0.92em", "lineHeight": "1.5"}),
@@ -545,7 +540,7 @@ app.layout = html.Div(
                                   html.Div("15.8 / 15.1%", style={"fontSize": "1.1em", "fontWeight": "700"}),
                                   html.Div("Tied", style={"fontSize": "0.78em", "color": MUTED})]),
                         html.Div([html.Div("MODEL", style={"fontSize": "0.7em", "color": MUTED}),
-                                  html.Div("21.6 / 10.7%", style={"fontSize": "1.1em", "fontWeight": "700"}),
+                                  html.Div("25.1 / 14.0%", style={"fontSize": "1.1em", "fontWeight": "700"}),
                                   html.Div("11pt gap", style={"fontSize": "0.78em", "color": MUTED})]),
                     ]),
                     html.Div("Market and fan bracket both pick France over Spain. Model strongly disagrees.",

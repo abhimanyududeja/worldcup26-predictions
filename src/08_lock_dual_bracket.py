@@ -45,12 +45,12 @@ fan_bracket = {
         "South Korea", "United States", "Croatia", "Senegal",
         "Sweden", "Egypt", "Ivory Coast", "Austria"
     ],
-    "r16_teams": ["Mexico","Morocco","Switzerland","Brazil","Turkey","Japan",
-                  "Germany","Netherlands","Belgium","Norway","Spain","France",
-                  "Argentina","Colombia","Portugal","England"],
-    "qf_teams": ["Mexico","Brazil","Japan","Netherlands","Norway","France",
-                 "Argentina","England"],
-    "sf_teams": ["Brazil","Netherlands","France","England"],
+    "r16_teams": ["France","Netherlands","Spain","Belgium","Brazil","Mexico",
+                  "Argentina","Portugal","Germany","Czech Republic","Norway","Ghana",
+                  "England","Turkey","Iran","Switzerland"],
+    "qf_teams": ["France","Netherlands","Spain","Belgium","Brazil","Mexico",
+                 "Argentina","Portugal"],
+    "sf_teams": ["France","Spain","Brazil","Argentina"],
     "finalists": ["Brazil","France"],
     "champion": "France",
 }

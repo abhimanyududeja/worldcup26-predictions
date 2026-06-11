@@ -7,148 +7,148 @@
       "team": "Spain",
       "american_odds": 475,
       "market_pct": 15.752775945748432,
-      "model_pct": 21.61,
-      "diff_pct": 5.857224054251567
+      "model_pct": 25.130000000000003,
+      "diff_pct": 9.37722405425157
     },
     {
       "team": "France",
       "american_odds": 500,
       "market_pct": 15.096410281342246,
-      "model_pct": 10.7,
-      "diff_pct": -4.396410281342246
+      "model_pct": 13.969999999999999,
+      "diff_pct": -1.1264102813422467
     },
     {
       "team": "England",
       "american_odds": 650,
       "market_pct": 12.077128225073796,
-      "model_pct": 8.48,
-      "diff_pct": -3.5971282250737966
+      "model_pct": 10.68,
+      "diff_pct": -1.397128225073796
     },
     {
       "team": "Brazil",
       "american_odds": 850,
       "market_pct": 9.534574914531945,
-      "model_pct": 6.34,
-      "diff_pct": -3.1945749145319446
+      "model_pct": 4.2299999999999995,
+      "diff_pct": -5.304574914531945
     },
     {
       "team": "Argentina",
       "american_odds": 900,
       "market_pct": 9.057846168805348,
-      "model_pct": 10.209999999999999,
-      "diff_pct": 1.1521538311946509
+      "model_pct": 13.87,
+      "diff_pct": 4.81215383119465
     },
     {
       "team": "Portugal",
       "american_odds": 1000,
       "market_pct": 8.234405608004861,
-      "model_pct": 3.5000000000000004,
-      "diff_pct": -4.734405608004861
+      "model_pct": 3.58,
+      "diff_pct": -4.654405608004862
     },
     {
       "team": "Germany",
       "american_odds": 1400,
       "market_pct": 6.038564112536898,
-      "model_pct": 4.68,
-      "diff_pct": -1.3585641125368981
+      "model_pct": 4.05,
+      "diff_pct": -1.9885641125368982
     },
     {
       "team": "Netherlands",
       "american_odds": 2200,
       "market_pct": 3.938193986437108,
-      "model_pct": 4.21,
-      "diff_pct": 0.2718060135628919
+      "model_pct": 3.09,
+      "diff_pct": -0.8481939864371079
     },
     {
       "team": "Norway",
       "american_odds": 3500,
       "market_pct": 2.5160683802237074,
-      "model_pct": 3.53,
-      "diff_pct": 1.0139316197762922
+      "model_pct": 2.1999999999999997,
+      "diff_pct": -0.31606838022370765
     },
     {
       "team": "Belgium",
       "american_odds": 3500,
       "market_pct": 2.5160683802237074,
-      "model_pct": 2.12,
-      "diff_pct": -0.3960683802237075
+      "model_pct": 1.78,
+      "diff_pct": -0.7360683802237076
     },
     {
       "team": "Colombia",
       "american_odds": 4000,
       "market_pct": 2.209230772879353,
-      "model_pct": 4.4799999999999995,
-      "diff_pct": 2.2707692271206468
+      "model_pct": 3.11,
+      "diff_pct": 0.9007692271206468
     },
     {
       "team": "Morocco",
       "american_odds": 5000,
       "market_pct": 1.7760482683932055,
-      "model_pct": 3.4099999999999997,
-      "diff_pct": 1.6339517316067944
+      "model_pct": 1.9,
+      "diff_pct": 0.12395173160679451
     },
     {
       "team": "Uruguay",
       "american_odds": 5000,
       "market_pct": 1.7760482683932055,
-      "model_pct": 1.27,
-      "diff_pct": -0.5060482683932055
+      "model_pct": 1.11,
+      "diff_pct": -0.6660482683932054
     },
     {
       "team": "United States",
       "american_odds": 6000,
       "market_pct": 1.4848928145582538,
-      "model_pct": 0.27999999999999997,
-      "diff_pct": -1.2048928145582538
+      "model_pct": 0.19,
+      "diff_pct": -1.2948928145582537
     },
     {
       "team": "Switzerland",
       "american_odds": 6500,
       "market_pct": 1.372400934667477,
-      "model_pct": 1.39,
-      "diff_pct": 0.017599065332522985
+      "model_pct": 1.1199999999999999,
+      "diff_pct": -0.25240093466747693
     },
     {
       "team": "Japan",
       "american_odds": 6500,
       "market_pct": 1.372400934667477,
-      "model_pct": 2.1999999999999997,
-      "diff_pct": 0.8275990653325229
+      "model_pct": 1.34,
+      "diff_pct": -0.032400934667476886
     },
     {
       "team": "Mexico",
       "american_odds": 8000,
       "market_pct": 1.1182526134327588,
-      "model_pct": 0.9299999999999999,
-      "diff_pct": -0.18825261343275895
+      "model_pct": 0.8,
+      "diff_pct": -0.3182526134327589
     },
     {
       "team": "Croatia",
       "american_odds": 8000,
       "market_pct": 1.1182526134327588,
-      "model_pct": 1.49,
-      "diff_pct": 0.3717473865672411
+      "model_pct": 1.02,
+      "diff_pct": -0.09825261343275882
     },
     {
       "team": "Ecuador",
       "american_odds": 8000,
       "market_pct": 1.1182526134327588,
-      "model_pct": 4.37,
-      "diff_pct": 3.2517473865672413
+      "model_pct": 2.83,
+      "diff_pct": 1.711747386567241
     },
     {
       "team": "Senegal",
       "american_odds": 9000,
       "market_pct": 0.9953677108577306,
-      "model_pct": 0.52,
-      "diff_pct": -0.47536771085773066
+      "model_pct": 0.47000000000000003,
+      "diff_pct": -0.5253677108577306
     },
     {
       "team": "Sweden",
       "american_odds": 10000,
       "market_pct": 0.8968164523569652,
-      "model_pct": 0.01,
-      "diff_pct": -0.8868164523569653
+      "model_pct": 0.0,
+      "diff_pct": -0.8968164523569652
     }
   ]
 }

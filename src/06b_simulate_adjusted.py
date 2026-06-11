@@ -1,8 +1,17 @@
 import json
+import sys
 import numpy as np
 import pandas as pd
 from pathlib import Path
 from scipy.stats import poisson as scipy_poisson
+
+# Import bracket logic from same directory
+sys.path.insert(0, str(Path(__file__).parent))
+from bracket_logic import (
+    assign_third_place_to_slots,
+    resolve_r32_matchups,
+    play_knockouts,
+)
 
 DATA = Path(__file__).parent.parent / "data" / "processed"
 RAW = Path(__file__).parent.parent / "data" / "raw"
@@ -28,7 +37,7 @@ sv["elo_orig"] = sv["team"].map(elo_orig)
 sv["elo_adj"] = sv["elo_orig"] + sv["elo_bonus"]
 
 print("=" * 80)
-print(f"{'Team':22s} {'Squad€M':>9s} {'EloOrig':>8s} {'Bonus':>7s} {'EloAdj':>8s}")
+print(f"{'Team':22s} {'SquadM':>9s} {'EloOrig':>8s} {'Bonus':>7s} {'EloAdj':>8s}")
 print("=" * 80)
 for _, r in sv.sort_values("elo_adj", ascending=False).iterrows():
     print(f"{r['team']:22s} {r['squad_value_m_eur']:>9.1f} {r['elo_orig']:>8.0f} "
@@ -74,31 +83,62 @@ def simulate_group(gf, rng):
     return [t[0] for t in r], st
 
 
+# Stage code -> label (for output JSON / dashboard)
+_STAGE_LABEL = {1: "R32", 2: "R16", 3: "QF", 4: "SF", 5: "Final", 6: "Champion"}
+
+
 def simulate_tournament(rng):
+    """v2: knockouts follow the official 2026 FIFA bracket structure."""
     groups = list("ABCDEFGHIJKL")
-    gr, thirds = {}, []
+    gr, st_by_g = {}, {}
     for g in groups:
         ranked, st = simulate_group(fixtures[fixtures["group"]==g], rng)
         gr[g] = ranked
-        thirds.append((ranked[2], st[ranked[2]]["pts"], st[ranked[2]]["gd"], st[ranked[2]]["gf"]))
-    thirds.sort(key=lambda x:(x[1],x[2],x[3],rng.random()), reverse=True)
-    top8 = [t[0] for t in thirds[:8]]
+        st_by_g[g] = st
+
+    # 8 best 3rd-place teams (FIFA tiebreakers: points, GD, GF)
+    thirds_pool = [
+        (g, gr[g][2],
+         st_by_g[g][gr[g][2]]["pts"],
+         st_by_g[g][gr[g][2]]["gd"],
+         st_by_g[g][gr[g][2]]["gf"])
+        for g in groups
+    ]
+    thirds_pool.sort(key=lambda x: (x[2], x[3], x[4], rng.random()), reverse=True)
+    qualifying_thirds = thirds_pool[:8]
+
+    # Build the per-slot inputs for bracket_logic
+    group_winners = {g: gr[g][0] for g in groups}
+    group_runners_up = {g: gr[g][1] for g in groups}
+    qualifying_groups = [t[0] for t in qualifying_thirds]
+    thirds_by_group = {t[0]: t[1] for t in qualifying_thirds}
+
+    # Initialize stage labels
     stage = {}
-    adv = []
     for g in groups:
-        adv += [gr[g][0], gr[g][1]]
-        stage[gr[g][0]]="R32"; stage[gr[g][1]]="R32"
-        stage[gr[g][2]]="group_stage"; stage[gr[g][3]]="group_stage"
-    for t in top8: adv.append(t); stage[t]="R32"
-    adv.sort(key=lambda t: elo.get(t,1500), reverse=True)
-    pairs = [(adv[i], adv[31-i]) for i in range(16)]
-    def pr(ps): return [simulate_match(a,b,must_have_winner=True,rng=rng)[2] for a,b in ps]
-    r16 = pr(pairs); [stage.__setitem__(t,"R16") for t in r16]
-    qf = pr([(r16[i],r16[i+1]) for i in range(0,16,2)]); [stage.__setitem__(t,"QF") for t in qf]
-    sf = pr([(qf[i],qf[i+1]) for i in range(0,8,2)]); [stage.__setitem__(t,"SF") for t in sf]
-    fn = pr([(sf[i],sf[i+1]) for i in range(0,4,2)]); [stage.__setitem__(t,"Final") for t in fn]
-    _,_,champ = simulate_match(fn[0],fn[1],must_have_winner=True,rng=rng)
-    stage[champ] = "Champion"
+        stage[gr[g][0]] = "R32"
+        stage[gr[g][1]] = "R32"
+        stage[gr[g][2]] = "group_stage"  # 3rd: may be upgraded to R32 below
+        stage[gr[g][3]] = "group_stage"
+    for _, team, *_ in qualifying_thirds:
+        stage[team] = "R32"
+
+    # FIFA 3rd-place slot assignment + concrete R32 matchups
+    third_assign = assign_third_place_to_slots(qualifying_groups)
+    matchups = resolve_r32_matchups(group_winners, group_runners_up,
+                                    thirds_by_group, third_assign)
+
+    # Play through the knockouts using simulate_match as the winner oracle
+    def match_winner_fn(a, b):
+        _, _, w = simulate_match(a, b, must_have_winner=True, rng=rng)
+        return w
+
+    winners, deepest = play_knockouts(matchups, match_winner_fn)
+
+    # Upgrade stage labels for teams that advanced past R32
+    for team, depth in deepest.items():
+        stage[team] = _STAGE_LABEL[depth]
+
     return stage
 
 
@@ -122,7 +162,7 @@ for _, m in fixtures.iterrows():
     match_preds.append({"match_id":int(m["match_id"]),"date":m["date"],"group":m["group"],
                         "home_team":m["home_team"],"away_team":m["away_team"],"venue":m["venue"], **p})
 
-print(f"Running {N_SIMS} simulations...")
+print(f"Running {N_SIMS} simulations (v2 bracket-aware)...")
 rng = np.random.RandomState(42)
 all_teams = sorted(set(fixtures["home_team"]) | set(fixtures["away_team"]))
 sl = ["group_stage","R32","R16","QF","SF","Final","Champion"]
@@ -151,6 +191,6 @@ for r in results:
           f"{r['p_qf']:>6.3f} {r['p_sf']:>6.3f} {r['p_final']:>6.3f} {r['p_win']:>6.3f}")
 
 out = {"match_predictions":match_preds,"tournament_simulation":results,"n_sims":N_SIMS,
-       "bonus_per_sd":BONUS_PER_SD,"model_version":"elo+squad_value"}
+       "bonus_per_sd":BONUS_PER_SD,"model_version":"elo+squad_value+fifa_bracket"}
 with open(DATA / "predictions_adjusted.json","w") as f: json.dump(out,f,indent=2)
 print(f"\nSaved to predictions_adjusted.json")
