@@ -1,73 +1,73 @@
 match_id,date,group,home_team,away_team,home_score,away_score
-1,2026-06-11,A,Mexico,South Africa,,
-2,2026-06-11,A,South Korea,Czech Republic,,
-3,2026-06-12,B,Canada,Bosnia and Herzegovina,,
-4,2026-06-12,D,United States,Paraguay,,
-5,2026-06-13,C,Haiti,Scotland,,
-6,2026-06-13,D,Australia,Turkey,,
-7,2026-06-13,C,Brazil,Morocco,,
-8,2026-06-13,B,Qatar,Switzerland,,
-9,2026-06-14,E,Ivory Coast,Ecuador,,
-10,2026-06-14,E,Germany,Curaçao,,
-11,2026-06-14,F,Netherlands,Japan,,
-12,2026-06-14,F,Sweden,Tunisia,,
-13,2026-06-15,H,Saudi Arabia,Uruguay,,
-14,2026-06-15,H,Spain,Cape Verde,,
-15,2026-06-15,G,Iran,New Zealand,,
-16,2026-06-15,G,Belgium,Egypt,,
-17,2026-06-16,I,France,Senegal,,
-18,2026-06-16,I,Iraq,Norway,,
-19,2026-06-16,J,Argentina,Algeria,,
-20,2026-06-16,J,Austria,Jordan,,
-21,2026-06-17,L,Ghana,Panama,,
-22,2026-06-17,L,England,Croatia,,
-23,2026-06-17,K,Portugal,DR Congo,,
-24,2026-06-17,K,Uzbekistan,Colombia,,
-25,2026-06-18,A,Czech Republic,South Africa,,
-26,2026-06-18,B,Switzerland,Bosnia and Herzegovina,,
-27,2026-06-18,B,Canada,Qatar,,
-28,2026-06-18,A,Mexico,South Korea,,
-29,2026-06-19,C,Brazil,Haiti,,
-30,2026-06-19,C,Scotland,Morocco,,
-31,2026-06-19,D,Turkey,Paraguay,,
-32,2026-06-19,D,United States,Australia,,
-33,2026-06-20,E,Germany,Ivory Coast,,
-34,2026-06-20,E,Ecuador,Curaçao,,
-35,2026-06-20,F,Netherlands,Sweden,,
-36,2026-06-20,F,Tunisia,Japan,,
-37,2026-06-21,H,Uruguay,Cape Verde,,
-38,2026-06-21,H,Spain,Saudi Arabia,,
-39,2026-06-21,G,Belgium,Iran,,
-40,2026-06-21,G,New Zealand,Egypt,,
-41,2026-06-22,I,Norway,Senegal,,
-42,2026-06-22,I,France,Iraq,,
-43,2026-06-22,J,Argentina,Austria,,
-44,2026-06-22,J,Jordan,Algeria,,
-45,2026-06-23,L,England,Ghana,,
-46,2026-06-23,L,Panama,Croatia,,
-47,2026-06-23,K,Portugal,Uzbekistan,,
-48,2026-06-23,K,Colombia,DR Congo,,
-49,2026-06-24,C,Scotland,Brazil,,
-50,2026-06-24,C,Morocco,Haiti,,
-51,2026-06-24,B,Switzerland,Canada,,
-52,2026-06-24,B,Bosnia and Herzegovina,Qatar,,
-53,2026-06-24,A,Czech Republic,Mexico,,
-54,2026-06-24,A,South Africa,South Korea,,
-55,2026-06-25,E,Curaçao,Ivory Coast,,
-56,2026-06-25,E,Ecuador,Germany,,
-57,2026-06-25,F,Japan,Sweden,,
-58,2026-06-25,F,Tunisia,Netherlands,,
-59,2026-06-25,D,Turkey,United States,,
-60,2026-06-25,D,Paraguay,Australia,,
-61,2026-06-26,I,Norway,France,,
-62,2026-06-26,I,Senegal,Iraq,,
-63,2026-06-26,G,Egypt,Iran,,
-64,2026-06-26,G,New Zealand,Belgium,,
-65,2026-06-26,H,Cape Verde,Saudi Arabia,,
-66,2026-06-26,H,Uruguay,Spain,,
-67,2026-06-27,L,Panama,England,,
-68,2026-06-27,L,Croatia,Ghana,,
-69,2026-06-27,J,Algeria,Austria,,
-70,2026-06-27,J,Jordan,Argentina,,
-71,2026-06-27,K,Colombia,Portugal,,
-72,2026-06-27,K,DR Congo,Uzbekistan,,
+1,2026-06-11,A,Mexico,South Africa,2.0,0.0
+2,2026-06-11,A,South Korea,Czech Republic,2.0,1.0
+3,2026-06-12,B,Canada,Bosnia and Herzegovina,1.0,1.0
+4,2026-06-12,D,United States,Paraguay,4.0,1.0
+5,2026-06-13,C,Haiti,Scotland,0.0,1.0
+6,2026-06-13,D,Australia,Turkey,2.0,0.0
+7,2026-06-13,C,Brazil,Morocco,1.0,1.0
+8,2026-06-13,B,Qatar,Switzerland,1.0,1.0
+9,2026-06-14,E,Ivory Coast,Ecuador,1.0,0.0
+10,2026-06-14,E,Germany,Curaçao,7.0,1.0
+11,2026-06-14,F,Netherlands,Japan,2.0,2.0
+12,2026-06-14,F,Sweden,Tunisia,5.0,1.0
+13,2026-06-15,H,Saudi Arabia,Uruguay,1.0,1.0
+14,2026-06-15,H,Spain,Cape Verde,0.0,0.0
+15,2026-06-15,G,Iran,New Zealand,2.0,2.0
+16,2026-06-15,G,Belgium,Egypt,1.0,1.0
+17,2026-06-16,I,France,Senegal,3.0,1.0
+18,2026-06-16,I,Iraq,Norway,1.0,4.0
+19,2026-06-16,J,Argentina,Algeria,3.0,0.0
+20,2026-06-16,J,Austria,Jordan,3.0,1.0
+21,2026-06-17,L,Ghana,Panama,1.0,0.0
+22,2026-06-17,L,England,Croatia,4.0,2.0
+23,2026-06-17,K,Portugal,DR Congo,1.0,1.0
+24,2026-06-17,K,Uzbekistan,Colombia,1.0,3.0
+25,2026-06-18,A,Czech Republic,South Africa,1.0,1.0
+26,2026-06-18,B,Switzerland,Bosnia and Herzegovina,4.0,1.0
+27,2026-06-18,B,Canada,Qatar,6.0,0.0
+28,2026-06-18,A,Mexico,South Korea,1.0,0.0
+29,2026-06-19,C,Brazil,Haiti,3.0,0.0
+30,2026-06-19,C,Scotland,Morocco,0.0,1.0
+31,2026-06-19,D,Turkey,Paraguay,0.0,1.0
+32,2026-06-19,D,United States,Australia,2.0,0.0
+33,2026-06-20,E,Germany,Ivory Coast,2.0,1.0
+34,2026-06-20,E,Ecuador,Curaçao,0.0,0.0
+35,2026-06-20,F,Netherlands,Sweden,5.0,1.0
+36,2026-06-20,F,Tunisia,Japan,0.0,4.0
+37,2026-06-21,H,Uruguay,Cape Verde,2.0,2.0
+38,2026-06-21,H,Spain,Saudi Arabia,4.0,0.0
+39,2026-06-21,G,Belgium,Iran,0.0,0.0
+40,2026-06-21,G,New Zealand,Egypt,1.0,3.0
+41,2026-06-22,I,Norway,Senegal,3.0,2.0
+42,2026-06-22,I,France,Iraq,3.0,0.0
+43,2026-06-22,J,Argentina,Austria,2.0,0.0
+44,2026-06-22,J,Jordan,Algeria,1.0,2.0
+45,2026-06-23,L,England,Ghana,0.0,0.0
+46,2026-06-23,L,Panama,Croatia,0.0,1.0
+47,2026-06-23,K,Portugal,Uzbekistan,5.0,0.0
+48,2026-06-23,K,Colombia,DR Congo,1.0,0.0
+49,2026-06-24,C,Scotland,Brazil,0.0,3.0
+50,2026-06-24,C,Morocco,Haiti,4.0,2.0
+51,2026-06-24,B,Switzerland,Canada,2.0,1.0
+52,2026-06-24,B,Bosnia and Herzegovina,Qatar,3.0,1.0
+53,2026-06-24,A,Czech Republic,Mexico,0.0,3.0
+54,2026-06-24,A,South Africa,South Korea,1.0,0.0
+55,2026-06-25,E,Curaçao,Ivory Coast,0.0,2.0
+56,2026-06-25,E,Ecuador,Germany,2.0,1.0
+57,2026-06-25,F,Japan,Sweden,1.0,1.0
+58,2026-06-25,F,Tunisia,Netherlands,1.0,3.0
+59,2026-06-25,D,Turkey,United States,3.0,2.0
+60,2026-06-25,D,Paraguay,Australia,0.0,0.0
+61,2026-06-26,I,Norway,France,1.0,4.0
+62,2026-06-26,I,Senegal,Iraq,5.0,0.0
+63,2026-06-26,G,Egypt,Iran,1.0,1.0
+64,2026-06-26,G,New Zealand,Belgium,1.0,5.0
+65,2026-06-26,H,Cape Verde,Saudi Arabia,0.0,0.0
+66,2026-06-26,H,Uruguay,Spain,0.0,1.0
+67,2026-06-27,L,Panama,England,0.0,2.0
+68,2026-06-27,L,Croatia,Ghana,2.0,1.0
+69,2026-06-27,J,Algeria,Austria,3.0,3.0
+70,2026-06-27,J,Jordan,Argentina,1.0,3.0
+71,2026-06-27,K,Colombia,Portugal,0.0,0.0
+72,2026-06-27,K,DR Congo,Uzbekistan,3.0,1.0
