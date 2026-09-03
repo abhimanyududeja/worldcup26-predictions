@@ -1,0 +1,66 @@
+{
+  "champion": "Spain",
+  "runner_up": "Argentina",
+  "final_score": "1-0",
+  "final_date": "2026-07-19",
+  "ml_pick": "Spain",
+  "fan_pick": "France",
+  "ml_correct": true,
+  "fan_correct": false,
+  "group_matches": 72,
+  "outcome_accuracy": 0.625,
+  "exact_scores": 0.1806,
+  "live_log_loss": 0.8933,
+  "baseline_log_loss": 1.043,
+  "test_log_loss": 0.89,
+  "knockouts": [
+    {
+      "date": "2026-07-09",
+      "home": "France",
+      "away": "Morocco",
+      "score": "2-0"
+    },
+    {
+      "date": "2026-07-10",
+      "home": "Spain",
+      "away": "Belgium",
+      "score": "2-1"
+    },
+    {
+      "date": "2026-07-11",
+      "home": "Norway",
+      "away": "England",
+      "score": "1-2"
+    },
+    {
+      "date": "2026-07-11",
+      "home": "Argentina",
+      "away": "Switzerland",
+      "score": "3-1"
+    },
+    {
+      "date": "2026-07-14",
+      "home": "France",
+      "away": "Spain",
+      "score": "0-2"
+    },
+    {
+      "date": "2026-07-15",
+      "home": "England",
+      "away": "Argentina",
+      "score": "1-2"
+    },
+    {
+      "date": "2026-07-18",
+      "home": "France",
+      "away": "England",
+      "score": "4-6"
+    },
+    {
+      "date": "2026-07-19",
+      "home": "Spain",
+      "away": "Argentina",
+      "score": "1-0"
+    }
+  ]
+}

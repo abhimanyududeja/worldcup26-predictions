@@ -19,6 +19,11 @@ with open(ROOT / "data" / "processed" / "calibration.json") as f:
     calibration = json.load(f)
 with open(ROOT / "data" / "processed" / "bookmaker_comparison.json") as f:
     bookmaker = json.load(f)
+try:
+    with open(ROOT / "data" / "processed" / "results_2026.json") as f:
+        results = json.load(f)
+except FileNotFoundError:
+    results = None
 
 ml_bracket = locked["ml_model"]
 
@@ -48,6 +53,7 @@ FLAGS = {
 def fl(t): return FLAGS.get(t, "🏳")
 
 ML_C, FAN_C = "#1e3a8a", "#a16207"
+WIN_C, LOSS_C = "#15803d", "#b91c1c"
 MUTED, BORDER, BG_LIGHT = "#64748b", "#e2e8f0", "#f8fafc"
 TEXT, CARD = "#0f172a", "#ffffff"
 
@@ -305,6 +311,27 @@ def stage_row(label, ml_val, fan_val):
 
 def team_list(teams): return " · ".join([f"{fl(t)} {t}" for t in teams])
 
+def stat_tile(value, label, note=None, color=None):
+    return html.Div(style={"flex": "1 1 200px", "minWidth": "200px", "background": "white",
+        "padding": "22px 24px", "borderRadius": "12px", "border": f"1px solid {BORDER}"},
+        children=[
+            html.Div(value, style={"fontSize": "1.9em", "fontWeight": "700",
+                "color": color or TEXT, "lineHeight": "1.1"}),
+            html.Div(label, style={"color": TEXT, "fontWeight": "600", "marginTop": "8px",
+                "fontSize": "0.95em"}),
+            html.Div(note, style={"color": MUTED, "fontSize": "0.85em", "marginTop": "4px",
+                "lineHeight": "1.5"}) if note else None,
+        ])
+
+
+def verdict_pill(ok):
+    return html.Span("CORRECT" if ok else "WRONG",
+        style={"background": "#dcfce7" if ok else "#fee2e2",
+               "color": WIN_C if ok else LOSS_C, "padding": "3px 10px",
+               "borderRadius": "4px", "fontSize": "0.7em", "fontWeight": "700",
+               "letterSpacing": "0.05em", "marginLeft": "10px"})
+
+
 def critique_card(label, label_color, title_parts, body):
     return html.Div(style={"background": "white", "padding": "24px", "borderRadius": "12px",
         "border": f"1px solid {BORDER}", "borderLeft": f"4px solid {label_color}",
@@ -328,7 +355,7 @@ app.layout = html.Div(
                 html.H1("Machine learning vs. football intuition",
                     style={"fontSize": "2.6em", "fontWeight": "700", "margin": "8px 0",
                         "letterSpacing": "-0.02em", "lineHeight": "1.1"}),
-                html.P(["Two predictions, both locked before the first match was played. ",
+                html.P(["Two predictions, both locked before the first match was played, now scored against the result. ",
                     html.A("Code and methodology on GitHub →",
                         href="https://github.com/abhimanyududeja/worldcup26-predictions",
                         target="_blank",
@@ -347,33 +374,71 @@ app.layout = html.Div(
             
             # Hero TL;DR - the whole thesis in one banner
             html.Div(style={"background": "white", "padding": "28px 32px",
-                "borderRadius": "14px", "border": f"2px solid {ML_C}",
+                "borderRadius": "14px", "border": f"2px solid {WIN_C}" if results else f"2px solid {ML_C}",
                 "marginBottom": "32px", "fontSize": "1.1em", "lineHeight": "1.7"},
-                children=[
-                    html.Div("THE BET", style={"fontSize": "0.72em", "color": ML_C,
+                children=([
+                    html.Div("HOW IT ENDED", style={"fontSize": "0.72em", "color": WIN_C,
                         "letterSpacing": "0.15em", "fontWeight": "700",
                         "marginBottom": "14px"}),
                     html.Div([
-                        html.Span("Three predictions, all locked before kickoff. "),
-                        html.Strong("My ML model says Spain wins. ",
-                            style={"color": ML_C}),
-                        html.Strong("I say France wins. ",
-                            style={"color": FAN_C}),
-                        html.Strong("FanDuel has them co-favorites. ",
-                            style={"color": "#7c3aed"}),
-                        "Two of these three will be more wrong than the third. ",
-                        html.Span("Scroll to see where they disagree.",
+                        html.Strong(f"{fl(results['champion'])} {results['champion']} won the 2026 World Cup",
+                            style={"color": WIN_C}),
+                        f", beating {results['runner_up']} {results['final_score']} in the final. ",
+                        html.Strong("The model called it. ", style={"color": ML_C}),
+                        html.Strong("I didn't. ", style={"color": FAN_C}),
+                        f"My pick, {results['fan_pick']}, went out to {results['champion']} in the semi-final ",
+                        html.Span("- the same-half bracket collision flagged below, before kickoff.",
                             style={"color": MUTED, "fontStyle": "italic"}),
                     ]),
-                ]),
+                ] if results else [
+                    html.Div("THE BET", style={"fontSize": "0.72em", "color": ML_C,
+                        "letterSpacing": "0.15em", "fontWeight": "700",
+                        "marginBottom": "14px"}),
+                    html.Div("Three predictions, all locked before kickoff."),
+                ])),
 
             html.Div(style={"display": "flex", "gap": "20px", "flexWrap": "wrap"},
                 children=[
-                    champion_card("ML MODEL PREDICTS", ml_bracket["champion"],
-                        f"{ml_probs[0]['p_win']*100:.1f}% to win the tournament", ML_C, "#eff6ff"),
+                    champion_card("ML MODEL PREDICTED", ml_bracket["champion"],
+                        f"{ml_probs[0]['p_win']*100:.1f}% to win the tournament"
+                        + (" - correct" if results and results["ml_correct"] else ""), ML_C, "#eff6ff"),
                     champion_card("FAN BRACKET", fan_bracket["champion"],
-                        "Picked by Abhimanyu, a football fan. No model involved.", FAN_C, "#fffbeb"),
+                        "Picked by Abhimanyu, a football fan. No model involved."
+                        + (f" - lost to {results['champion']} in the semi-final" if results and not results["fan_correct"] else ""),
+                        FAN_C, "#fffbeb"),
                 ]),
+
+            # RESULTS
+            *([
+                section_title("How the locked predictions scored",
+                    "Measured after the tournament against the bracket locked on 11 June 2026."),
+                html.Div(style={"display": "flex", "gap": "16px", "flexWrap": "wrap"},
+                    children=[
+                        stat_tile(f"{fl(results['champion'])} {results['champion']}", "Actual champion",
+                            f"Beat {results['runner_up']} {results['final_score']} on {results['final_date']}."),
+                        stat_tile("Model" if results["ml_correct"] else "Fan", "Called the champion",
+                            f"Model picked {results['ml_pick']}; fan bracket picked {results['fan_pick']}.",
+                            WIN_C),
+                        stat_tile(f"{results['outcome_accuracy']*100:.1f}%", "Group-stage outcome accuracy",
+                            f"Over {results['group_matches']} matches. Exact scoreline {results['exact_scores']*100:.1f}%."),
+                        stat_tile(f"{results['live_log_loss']:.3f}", "Live log loss",
+                            f"vs {results['baseline_log_loss']:.3f} baseline, and within "
+                            f"{abs(results['live_log_loss']-results['test_log_loss']):.3f} of the "
+                            f"{results['test_log_loss']:.3f} held-out test loss - calibration held."),
+                    ]),
+                html.Div(style={"background": "white", "padding": "22px 24px", "borderRadius": "12px",
+                    "border": f"1px solid {BORDER}", "marginTop": "16px", "color": "#334155",
+                    "lineHeight": "1.7"},
+                    children=[
+                        html.Strong("The honest read: "),
+                        "the model beat me. It called the champion and I didn't, and the single "
+                        "structural argument on this page - that Spain and France sit in the same "
+                        "half and meet in the semi-final rather than the final - is exactly what "
+                        "knocked my pick out. The live log loss landing within 0.003 of the "
+                        "held-out test loss matters more than the champion call, which is one "
+                        "sample: it says the probabilities were calibrated, not lucky.",
+                    ]),
+            ] if results else []),
 
             # TOP 10 ML
             section_title("ML model: top 10 most likely champions",
@@ -662,7 +727,7 @@ app.layout = html.Div(
                 children=[html.Div(["Built by Abhimanyu Dudeja · ",
                     html.A("GitHub", href="https://github.com/abhimanyududeja/worldcup26-predictions",
                         target="_blank", style={"color": ML_C, "textDecoration": "none"}),
-                    " · Locked before kickoff, scored against reality as the tournament unfolds."])]),
+                    " · Locked before kickoff, scored against the finished tournament."])]),
         ])]
 )
 
