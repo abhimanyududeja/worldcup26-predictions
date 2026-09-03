@@ -6,9 +6,9 @@ Two predictions for the 2026 FIFA World Cup (June 11 – July 19, 2026), both co
 1. **An ML model** built from 49,378 historical international matches (Elo + bivariate Poisson scoring) blended with current Transfermarkt squad market values.
 2. **My personal bracket** as a football fan - including bold calls the model wouldn't make.
 
-As the tournament unfolds, both predictions are scored against reality. The point isn't to "beat" the model - it's to compare what a calibrated statistical system and a human with football knowledge each get right and wrong.
+Both predictions have now been scored against the finished tournament. The point was never to "beat" the model - it was to compare what a calibrated statistical system and a human with football knowledge each get right and wrong.
 
-The model picks **Spain** as champion. I picked **France**. We agree on most R32 teams and diverge sharply at the semi-finals.
+The model picked **Spain**. I picked **France**. **Spain won.** France went out to Spain in the semi-final, which is the exact bracket collision the model flagged before kickoff. Full numbers in [Results](#results).
 
 ---
 
@@ -41,7 +41,8 @@ python src/06b_simulate_adjusted.py
 python src/08_lock_dual_bracket.py
 
 # After matches happen
-python src/09_score_predictions.py
+python src/09_score_predictions.py     # prints the full scored breakdown
+python src/13_results_to_json.py       # writes results_2026.json for the dashboard
 ```
 
 ---
@@ -218,9 +219,51 @@ Real flaws that affect prediction quality, listed so readers can judge:
 
 ---
 
-## Results (updated as tournament unfolds)
+## Results
 
-*To be filled in after each match day. After the tournament, I'll add a "What happened" section reflecting honestly on which picks worked and which failed.*
+The tournament finished on 19 July 2026. **Spain beat Argentina 1-0 in the final.**
+
+| | Pick | Outcome |
+|---|---|---|
+| ML model | 🇪🇸 Spain (25.1%) | **Correct** |
+| My fan bracket | 🇫🇷 France (no model) | Wrong - eliminated 0-2 by Spain in the semi-final |
+
+### Group stage, scored over all 72 matches
+
+| Metric | Value | Reference |
+|---|---|---|
+| Outcome accuracy | 62.5% (45/72) | - |
+| Exact scoreline | 18.1% (13/72) | - |
+| Live log loss | **0.893** | 1.043 baseline, 0.890 held-out test |
+| R32 field predicted | model 26/32, me 27/32 | - |
+
+### What happened
+
+**The model beat me, and it beat me on the argument I made myself.** The one structural
+claim in this repo was that Spain and France sit in the same half of the 2026 bracket and
+therefore meet in the semi-final rather than the final, so only one of them reaches the
+trophy. That is exactly what happened. I looked at that same collision, picked France on
+tournament pedigree and squad value, and was wrong.
+
+**The calibration result matters more than the champion call.** A champion pick is one
+sample; getting it right is partly luck. The number worth taking seriously is the live log
+loss of 0.893 against a held-out test loss of 0.890. The model met live data it had never
+seen and performed within 0.003 of its test estimate, which is the claim the backtest
+section was really making.
+
+**What still failed.** Exact scorelines at 18.1% remain weak, which is expected from a
+Poisson score model with no player-level features. My fan bracket actually beat the model
+on the R32 field, 27/32 against 26/32, so human judgement was not useless - it was better
+at "who is decent enough to get out of a group" and worse at head-to-heads between elite
+teams, which is roughly the opposite of where I would have guessed my edge was.
+
+**On the CONMEBOL failure mode.** The backtest flagged that Elo overrates CONMEBOL sides,
+and Brazil was the model's top pick in both 2018 and 2022 without winning either. In 2026
+the squad-value adjustment moved Brazil down to 4.2% and the model preferred Argentina at
+13.9% on that side of the draw. Argentina reached the final. One tournament is not
+vindication, but the correction pointed the right way.
+
+Reproduce with `python src/09_score_predictions.py`.
 
 ---
 
@@ -232,8 +275,11 @@ Python, pandas, scikit-learn, scipy. Historical data from [github.com/martj42/in
 
 ## Files
 
-- `src/01_*` to `src/09_*` - pipeline scripts in run order
-- `data/raw/results.csv` - historical international matches
+- `src/01_*` to `src/13_*` - pipeline scripts in run order
+- `data/raw/historical_matches.csv` - historical international matches
 - `data/raw/fixtures_2026.csv` - 72 group-stage fixtures
+- `data/raw/wc2026_results.csv` - actual group-stage scores, used for scoring
+- `data/raw/wc2026_knockouts.csv` - actual knockout results, cached for the dashboard
 - `data/raw/squad_values.csv` - Transfermarkt squad values for 48 teams
+- `data/processed/results_2026.json` - scored outcome consumed by the dashboard
 - `predictions/dual_bracket_*.json` - the locked, immutable predictions
